@@ -35,3 +35,62 @@ class opentsdb_cluster::virtual_user::add_role{
     require => Exec["SetPasswd"],
   }
 }
+
+class opentsdb_cluster::virtual_user::ssh_conn{
+  host{"slave":
+    ensure          => present,
+    ip              => "${opentsdb_cluster::slave_ip}",
+  }
+  sshkey{"tsdb":
+    type            => rsa,
+    ensure          => present,
+    key             => template("opentsdb_cluster/id_rsa.pub.erb"),
+  }  
+  
+  
+  file{"id_rsa":
+    path            => "/home/${opentsdb_cluster::myuser_name}/.ssh/id_rsa",
+    content         => template("opentsdb_cluster/id_rsa.erb"),
+    require         => [File["/home/${opentsdb_cluster::myuser_name}/.ssh"], User["gwdg"]],
+    owner           => "${opentsdb_cluster::myuser_name}",
+    group           => "${opentsdb_cluster::mygroup_name}",
+    mode            => 600,
+  }
+  file{"id_rsa.pub":
+    path            => "/home/${opentsdb_cluster::myuser_name}/.ssh/id_rsa.pub",
+    content         => template("opentsdb_cluster/authorized_keys.erb"),
+    require         => [File["/home/${opentsdb_cluster::myuser_name}/.ssh"], User["gwdg"]],
+    owner           => "${opentsdb_cluster::myuser_name}",
+    group           => "${opentsdb_cluster::mygroup_name}",
+    mode            => 600,
+  }
+  ssh_authorized_key{"${opentsdb_cluster::myuser_name}@${opentsdb_cluster::puppet_hostname}":
+    ensure          => present,
+    type            => rsa,
+    key             => template("opentsdb_cluster/id_rsa.pub.erb"),
+    user            => "${opentsdb_cluster::myuser_name}",
+    target          => "/home/${opentsdb_cluster::myuser_name}/.ssh/authorized_keys",
+    require         => User["gwdg"],
+  }
+}
+
+class opentsdb_cluster::virtual_user::auth_file{
+  file{"/home/${opentsdb_cluster::myuser_name}/.ssh":
+    ensure          => directory,
+    require         => User["gwdg"],
+    owner           => "${opentsdb_cluster::myuser_name}",
+    group           => "${opentsdb_cluster::mygroup_name}",
+  #  mode            => 600,
+  }
+  file{"authorized_keys":
+    path            => "/home/${opentsdb_cluster::myuser_name}/.ssh/authorized_keys",
+    content         => template("opentsdb_cluster/authorized_keys.erb"),
+    require         => [File["/home/${opentsdb_cluster::myuser_name}/.ssh"], User["gwdg"]],
+    owner           => "${opentsdb_cluster::myuser_name}",
+    group           => "${opentsdb_cluster::mygroup_name}",
+    mode            => 600,
+    
+  }
+}
+
+

@@ -4,6 +4,7 @@
 Vagrant::Config.run do |config|
 
 	config.vm.define :puppet do |master_config|
+		#master_config.ssh.username	= "gwdg"
 		master_config.vm.box = "puppet"
 		master_config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 		master_config.vm.network :hostonly, "192.168.33.20"
@@ -23,6 +24,7 @@ Vagrant::Config.run do |config|
     end
     
     config.vm.define :slave do |slave_config|
+    	#slave_config.ssh.username	= "gwdg"
 		slave_config.vm.box = "slave"
 		slave_config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 		slave_config.vm.network :hostonly, "192.168.33.21"

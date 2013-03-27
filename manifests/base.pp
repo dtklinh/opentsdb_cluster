@@ -1,13 +1,16 @@
 node "puppet"{
-  file{"/tmp/hello_master.txt":
-    ensure        => present,
-    content       => "I am the master \n",
-  }
+  include opentsdb_cluster
+#  include opentsdb_cluster::virtual_user
+#  User <|title == "gwdg"|>
+#  Group <|title == "goettingen"|>
+#  include opentsdb_cluster::virtual_user::add_role
+ 
 }
 
 node "slave"{
-  file{"/tmp/hello_slave.txt":
-    ensure        => present,
-    content       => "I am your slave \n",
-  }
+  include opentsdb_cluster
+#  include opentsdb_cluster::virtual_user
+#  User <|title == "gwdg"|>
+#  Group <|title == "goettingen"|>
+#  include opentsdb_cluster::virtual_user::add_role
 }
