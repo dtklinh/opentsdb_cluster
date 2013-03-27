@@ -1,14 +1,26 @@
 node "puppet"{
-  include opentsdb_cluster
+#  include opentsdb_cluster
 #  include opentsdb_cluster::virtual_user
 #  User <|title == "gwdg"|>
 #  Group <|title == "goettingen"|>
 #  include opentsdb_cluster::virtual_user::add_role
- 
+
+/* 
+    file{"/tmp/hello.txt":
+      ensure            => present,
+      content           => "Hadoop is awesome \n",
+    }
+    exec{"add":
+      command           => "echo 'Hadoop is shit' >> /tmp/hello.txt",
+      unless            => "grep -q 'Hadoop' /tmp/hello.txt",
+      require           => File["/tmp/hello.txt"],
+      path              => $::path,
+    }
+ */
 }
 
 node "slave"{
-  include opentsdb_cluster
+#  include opentsdb_cluster
 #  include opentsdb_cluster::virtual_user
 #  User <|title == "gwdg"|>
 #  Group <|title == "goettingen"|>

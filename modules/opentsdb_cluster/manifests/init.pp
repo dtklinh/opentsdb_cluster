@@ -8,8 +8,12 @@ class opentsdb_cluster(
   $mygroup_name                   = "goettingen",
   $mygroup_id                     = "1010",
   $hadoop_parent_dir              = "/usr/local",
-  $hadoop_name                    = ""
+  $hadoop_version                 = "1.0.3",
+  $hadoop_source_link             = "http://apache.openmirror.de/hadoop/core/hadoop-1.0.3/hadoop-1.0.3.tar.gz",
+  $java_home                      = "/usr/lib/jvm/java-1.6.0-openjdk-amd64"
+
 ){
+  $hadoop_working_dir             = "${hadoop_parent_dir}/hadoop-${hadoop_version}"
   include opentsdb_cluster::virtual_user
   User <|title == "gwdg"|>
   Group <|title == "goettingen"|>
