@@ -3,12 +3,11 @@
 
 Vagrant::Config.run do |config|
 
-	config.vm.define :puppet do |master_config|
-		#master_config.ssh.username	= "gwdg"
-		master_config.vm.box = "puppet"
+	config.vm.define :master do |master_config|
+		master_config.vm.box = "master"
 		master_config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 		master_config.vm.network :hostonly, "192.168.33.20"
-		master_config.vm.host_name = "puppet"
+		master_config.vm.host_name = "master"
 		master_config.vm.provision :puppet do |p|
   			p.manifests_path = "manifests"
   		   	p.manifest_file  = "base.pp"
@@ -30,7 +29,7 @@ Vagrant::Config.run do |config|
 		slave_config.vm.network :hostonly, "192.168.33.21"
 		slave_config.vm.host_name = "slave"
 		slave_config.vm.provision :puppet_server, :options => "--verbose --debug" do |p|
-			p.puppet_server  = "puppet"
+			p.puppet_server  = "master"
   		#	p.puppet_node    = "slave"
   		#	p.manifest_file	 = "base.pp"
   		#	p.manifests_path = "manifests"

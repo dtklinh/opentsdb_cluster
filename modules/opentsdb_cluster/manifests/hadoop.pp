@@ -1,45 +1,162 @@
-class opentsdb_cluster::hadoop{
-  
-  package{"openjdk-6-jdk":
-    ensure          => installed,
-    require         => Exec["download_hadoop"],
+class opentsdb_cluster::hadoop {
+  include opentsdb_cluster::virtual_user
+
+  package { "openjdk-6-jdk":
+    ensure  => installed,
+    require => Exec["update"],
   }
-  
-  ##download hadoop
-  exec{"download_hadoop":
-    command                 => "apt-get update; apt-get upgrade; wget ${opentsdb_cluster::hadoop_source_link}; tar xzf hadoop-${opentsdb_cluster::hadoop_version}.tar.gz",
-    cwd                     => "${opentsdb_cluster::hadoop_parent_dir}",
-    creates                 => "${opentsdb_cluster::hadoop_working_dir}",
-    path                    => $::path,
+
+  # #download hadoop
+  exec { "download_hadoop":
+    command => 
+    "wget ${opentsdb_cluster::hadoop_source_link}; tar xzf hadoop-${opentsdb_cluster::hadoop_version}.tar.gz",
+    cwd     => "${opentsdb_cluster::hadoop_parent_dir}",
+    creates => "${opentsdb_cluster::hadoop_working_dir}",
+    path    => $::path,
+    require => [User["gwdg"], Package["openjdk-6-jdk"]],
   }
-  ## re-own file
-  file{"reown_hadoop":
-    path                    => "${opentsdb_cluster::hadoop_working_dir}",
-    backup                  => false,
-    recurse                 => true,
-    owner                   => "${opentsdb_cluster::myuser_name}",
-    group                   => "${opentsdb_cluster::mygroup_name}",
-    require                 => [Exec["download_hadoop"], User["gwdg"]],
+  exec{"update":
+    command => "/usr/bin/apt-get update;/usr/bin/apt-get upgrade",
+    path => $::path,
+    tries => 3,
+#    user => "${opentsdb_cluster::myuser_name}",
   }
-  ## add environment variable
-  $var      = template("opentsdb_cluster/hadoop_env_var.erb")
-  exec{"add_env_var":
-    command                 => "echo ${var} >> /home/${opentsdb_cluster::myuser_name}/.bashrc",
-    path                    => $::path,
-    unless                  => "grep -q 'HADOOP' /home/${opentsdb_cluster::myuser_name}/.bashrc",
-    require                 => File["reown_hadoop"],
+
+  # # re-own file
+  file { "reown_hadoop":
+    path    => "${opentsdb_cluster::hadoop_working_dir}",
+    backup  => false,
+    recurse => true,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => [Exec["download_hadoop"], User["gwdg"]],
   }
-  ##create folder to store data
-  file{["/app","/app/hadoop", "/app/hadoop/tmp"]:
-    ensure                  => directory,
-    owner                   => "${opentsdb_cluster::myuser_name}",
-    group                   => "${opentsdb_cluster::mygroup_name}",
-    require                 => User["gwdg"],
-    before                  => File["reown_hadoop"],
-    mode                    => 750,
+  # # add environment variable
+  $var = template("opentsdb_cluster/hadoop_env_var.erb")
+
+  exec { "add_env_var":
+    command => "echo ${var} >> /home/${opentsdb_cluster::myuser_name}/.bashrc",
+    path    => $::path,
+    unless  => "grep -q 'HADOOP' /home/${opentsdb_cluster::myuser_name}/.bashrc",
+    require => File["reown_hadoop"],
   }
-  
+
+  # #create folder to store data
+  file { ["/app", "/app/hadoop", "/app/hadoop/tmp"]:
+    ensure  => directory,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => User["gwdg"],
+    before  => File["reown_hadoop"],
+    mode    => 750,
+  }
+  include opentsdb_cluster::hadoop::copy_file
+
 }
 
+class opentsdb_cluster::hadoop::copy_file {
+  file { "core-site":
+    path    => "${opentsdb_cluster::hadoop_working_dir}/conf/core-site.xml",
+    content => template("opentsdb_cluster/hadoop/conf/core-site.xml.erb"),
+    ensure  => present,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => File["reown_hadoop"],
+  }
 
+  file { "hadoop-env":
+    path    => "${opentsdb_cluster::hadoop_working_dir}/conf/hadoop-env.sh",
+    content => template("opentsdb_cluster/hadoop/conf/hadoop-env.sh.erb"),
+    ensure  => present,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => File["reown_hadoop"],
+  }
+
+  file { "hdfs-site":
+    path    => "${opentsdb_cluster::hadoop_working_dir}/conf/hdfs-site.xml",
+    content => template("opentsdb_cluster/hadoop/conf/hdfs-site.xml.erb"),
+    ensure  => present,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => File["reown_hadoop"],
+  }
+
+  file { "mapred-site":
+    path    => "${opentsdb_cluster::hadoop_working_dir}/conf/mapred-site.xml",
+    content => template("opentsdb_cluster/hadoop/conf/mapred-site.xml.erb"),
+    ensure  => present,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => File["reown_hadoop"],
+  }
+
+  file { "masters":
+    path    => "${opentsdb_cluster::hadoop_working_dir}/conf/masters",
+    content => template("opentsdb_cluster/hadoop/conf/masters.erb"),
+    ensure  => present,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => File["reown_hadoop"],
+  }
+
+  file { "slaves":
+    path    => "${opentsdb_cluster::hadoop_working_dir}/conf/slaves",
+    content => template("opentsdb_cluster/hadoop/conf/slaves.erb"),
+    ensure  => present,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => File["reown_hadoop"],
+  }
+
+}
+
+class opentsdb_cluster::hadoop::format {
+  include opentsdb_cluster::virtual_user::ssh_conn
+  include opentsdb_cluster::virtual_user::auth_file
+
+  exec { "format_hadoop":
+    command => "su - ${opentsdb_cluster::myuser_name} -c 'cd ${opentsdb_cluster::hadoop_working_dir}/bin; hadoop namenode -format'",
+    path    => $::path,
+    creates => "${opentsdb_cluster::hadoop_working_dir}/format_done",
+    require => [
+      File["reown_hadoop"],
+      File["core-site"],
+      File["hadoop-env"],
+      File["hdfs-site"],
+      File["mapred-site"],
+      File["masters"],
+      File["slaves"],
+      File["id_rsa"],
+      File["id_rsa.pub"],
+      File["authorized_keys"]],
+  }
+
+  file { "format_done":
+    path    => "${opentsdb_cluster::hadoop_working_dir}/format_done",
+    ensure  => directory,
+    require => Exec["format_hadoop"],
+  }
+}
+
+class opentsdb_cluster::hadoop::service {
+  include opentsdb_cluster::virtual_user::ssh_conn
+  include opentsdb_cluster::virtual_user::auth_file
+
+  file { "hadoop_service":
+    ensure  => present,
+    path    => "${opentsdb_cluster::service_path}/hadoop",
+    content => template("opentsdb_cluster/hadoop/service/hadoop.erb"),
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    mode    => 777,
+    require => File["reown_hadoop"],
+    notify  => Service["hadoop"],
+  }
+
+  service { "hadoop":
+    ensure  => running,
+    require => [File["hadoop_service"], File["id_rsa"], File["id_rsa.pub"], File["authorized_keys"]],
+  }
+}
 

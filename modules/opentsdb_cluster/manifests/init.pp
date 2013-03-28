@@ -1,6 +1,6 @@
 class opentsdb_cluster(
-  $puppet_hostname                = "puppet",
-  $list_slave                     = "puppet, slave",
+  $puppet_hostname                = "master",
+  $slave_hostname                 = "slave",
   $slave_ip                       = "192.168.33.21",
   $myuser_name                    = "gwdg",
   $myuser_id                      = "1010",
@@ -10,7 +10,8 @@ class opentsdb_cluster(
   $hadoop_parent_dir              = "/usr/local",
   $hadoop_version                 = "1.0.3",
   $hadoop_source_link             = "http://apache.openmirror.de/hadoop/core/hadoop-1.0.3/hadoop-1.0.3.tar.gz",
-  $java_home                      = "/usr/lib/jvm/java-1.6.0-openjdk-amd64"
+  $java_home                      = "/usr/lib/jvm/java-1.6.0-openjdk-amd64",
+  $service_path                   = "/etc/init.d"
 
 ){
   $hadoop_working_dir             = "${hadoop_parent_dir}/hadoop-${hadoop_version}"
@@ -22,4 +23,9 @@ class opentsdb_cluster(
     include opentsdb_cluster::virtual_user::ssh_conn
   }
   include opentsdb_cluster::virtual_user::auth_file
+  include opentsdb_cluster::hadoop
+  if $::hostname == $puppet_hostname{
+    include opentsdb_cluster::hadoop::format
+    include opentsdb_cluster::hadoop::service
+  }
 }
