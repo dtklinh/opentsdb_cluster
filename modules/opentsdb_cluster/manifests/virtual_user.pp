@@ -22,7 +22,8 @@ class opentsdb_cluster::virtual_user{
 
 class opentsdb_cluster::virtual_user::add_role{
   exec{"SetPasswd":
-    command     => "usermod -p ${opentsdb_cluster::myuser_passwd} ${opentsdb_cluster::myuser_name}; adduser ${opentsdb_cluster::myuser_name} sudo",
+#    command     => "usermod -p ${opentsdb_cluster::myuser_passwd} ${opentsdb_cluster::myuser_name}; adduser ${opentsdb_cluster::myuser_name} sudo",
+    command     => "usermod -p ${opentsdb_cluster::myuser_passwd} ${opentsdb_cluster::myuser_name}; usermod -a -G sudo ${opentsdb_cluster::myuser_name}",
     #path        => "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/vagrant_ruby/bin",
     path        => $::path,
     creates     => "/home/tmp_dir",

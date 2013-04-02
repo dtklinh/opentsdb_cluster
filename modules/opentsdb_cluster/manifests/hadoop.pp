@@ -3,24 +3,40 @@ class opentsdb_cluster::hadoop {
 
   package { "openjdk-6-jdk":
     ensure  => installed,
-    require => Exec["update"],
+    require => Exec["extract_hadoop"],
+  }
+  
+  file{"aaa":
+    path  => "${opentsdb_cluster::hadoop_parent_dir}",
+    ensure  => directory,
+    recurse => false,
+    owner   => "${opentsdb_cluster::myuser_name}",
+    group   => "${opentsdb_cluster::mygroup_name}",
+    require => User["gwdg"],
   }
 
   # #download hadoop
   exec { "download_hadoop":
-    command => 
-    "wget ${opentsdb_cluster::hadoop_source_link}; tar xzf hadoop-${opentsdb_cluster::hadoop_version}.tar.gz",
+    command => "wget ${opentsdb_cluster::hadoop_source_link}", #; tar xzf hadoop-${opentsdb_cluster::hadoop_version}.tar.gz",
     cwd     => "${opentsdb_cluster::hadoop_parent_dir}",
-    creates => "${opentsdb_cluster::hadoop_working_dir}",
+    path    => "/bin:/usr/bin",
+    creates => "${opentsdb_cluster::hadoop_parent_dir}/hadoop-${opentsdb_cluster::hadoop_version}.tar.gz",#"${opentsdb_cluster::hadoop_working_dir}",
+    
+    require => [User["gwdg"], File["aaa"]],
+  }
+  exec{"extract_hadoop":
+    command => "tar xzf hadoop-${opentsdb_cluster::hadoop_version}.tar.gz",
+    cwd     => "${opentsdb_cluster::hadoop_parent_dir}",
     path    => $::path,
-    require => [User["gwdg"], Package["openjdk-6-jdk"]],
+    creates => "${opentsdb_cluster::hadoop_working_dir}",
+    require => Exec["download_hadoop"],
   }
-  exec{"update":
-    command => "/usr/bin/apt-get update;/usr/bin/apt-get upgrade",
-    path => $::path,
-    tries => 3,
+#  exec{"update":
+#    command => "apt-get update",
+#    path => $::path,
+#    tries => 3,
 #    user => "${opentsdb_cluster::myuser_name}",
-  }
+#  }
 
   # # re-own file
   file { "reown_hadoop":
@@ -29,7 +45,7 @@ class opentsdb_cluster::hadoop {
     recurse => true,
     owner   => "${opentsdb_cluster::myuser_name}",
     group   => "${opentsdb_cluster::mygroup_name}",
-    require => [Exec["download_hadoop"], User["gwdg"]],
+    require => [Exec["extract_hadoop"], User["gwdg"], Package["openjdk-6-jdk"]],
   }
   # # add environment variable
   $var = template("opentsdb_cluster/hadoop_env_var.erb")
