@@ -23,16 +23,21 @@ class opentsdb_cluster (
   $opentsdb_parent_dir = "/usr/local",
   $opentsdb_port       = '4242',
   $compression        = 'NONE',
-  $master_node        = 'false',
+  $master_node        = false,
   
   $tcollector_parent_dir = "/usr/local",
   
+  $install_hadoop     = false,
+  $install_hbase      = false,
+  $install_opentsdb   = false,
+  $install_tcollector = false
   ) {
   $hadoop_working_dir = "${hadoop_parent_dir}/hadoop-${hadoop_version}"
   $hbase_working_dir  = "${hbase_parent_dir}/hbase-${hbase_version}"
   $opentsdb_working_dir = "${opentsdb_parent_dir}/opentsdb"
   $tcollector_working_dir = "${tcollector_parent_dir}/tcollector"
   
+  ########################---Prepare Machines---########################
   include opentsdb_cluster::virtual_user
   User <| title == "gwdg" |>
   Group <| title == "goettingen" |>
@@ -42,9 +47,47 @@ class opentsdb_cluster (
     include opentsdb_cluster::virtual_user::ssh_conn
   }
   include opentsdb_cluster::virtual_user::auth_file
+  #######################################################################
+  
+  ##########################---Install Hadoop---#########################
+  if $install_hadoop == true{
+    include opentsdb_cluster::hadoop
+    if $::hostname == $puppet_hostname{
+      include opentsdb_cluster::hadoop::format
+      include opentsdb_cluster::hadoop::service
+    }
+  }
+  #######################################################################
+  
+  ##########################---Install Hbase---##########################
+  if $install_hbase == true{
+    include opentsdb_cluster::hbase
+    if $::hostname == $puppet_hostname{
+      include opentsdb_cluster::hbase::service
+    }
+  }
+  #######################################################################
+  
+  #########################---Install Opentsdb---########################
+  if $install_opentsdb == true{
+    include opentsdb_cluster::opentsdb
+  }
+  #######################################################################
+  
+  #########################---Install Opentsdb---########################
+  if $install_tcollector == true{
+    include opentsdb_cluster::tcollector
+  }
+  #######################################################################
+  /*
   include opentsdb_cluster::hadoop
-  #  if $::hostname == $puppet_hostname{
-  #    include opentsdb_cluster::hadoop::format
-  #    include opentsdb_cluster::hadoop::service
-  #  }
+  include opentsdb_cluster::hbase
+    if $::hostname == $puppet_hostname{
+      include opentsdb_cluster::hadoop::format
+      include opentsdb_cluster::hadoop::service
+      include opentsdb_cluster::hbase::service
+      include opentsdb_cluster::opentsdb
+      include opentsdb_cluster::tcollector
+    }
+    */
 }

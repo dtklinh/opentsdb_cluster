@@ -9,10 +9,10 @@
 # Short-Description: Enable Hadoop services including hdfs
 ### END INIT INFO
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-HADOOP_BIN=<%= hadoop_working_dir %>/bin
+HADOOP_BIN=<%= scope.lookupvar('::opentsdb_cluster::hadoop_working_dir') %>/bin
 NAME=gwdg
 DESC=hadoop
-USER=<%= myuser_name %>
+USER=<%= scope.lookupvar('::opentsdb_cluster::myuser_name') %>
 ROTATE_SUFFIX=
 test -x $HADOOP_BIN || exit 0
 RETVAL=0

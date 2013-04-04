@@ -7,6 +7,7 @@ class opentsdb_cluster::hbase{
     path    => $::path,
     creates => "${opentsdb_cluster::hbase_working_dir}",
     require => User["gwdg"],
+    user    => $opentsdb_cluster::myuser_name,
   }
   file{"reown_hbase":
     path    => $opentsdb_cluster::hbase_working_dir,
@@ -25,13 +26,14 @@ class opentsdb_cluster::hbase{
     require => File["reown_hbase"],
   }
   exec{"copy_jar":
-    command => "cp ${opentsdb_cluster::hadoop_working_dir}/hadoop-core-1.0.3.jar ${opentsdb_cluster::hbase_working_dir}/lib/hadoop-core-1.0.3.jar",
-    creates => "${opentsdb_cluster::hbase_working_dir}/lib/hadoop-core-1.0.3.jar",
+    command => "cp ${opentsdb_cluster::hadoop_working_dir}/hadoop-core-${opentsdb_cluster::hadoop_version}.jar ${opentsdb_cluster::hbase_working_dir}/lib/hadoop-core-${opentsdb_cluster::hadoop_version}.jar",
+    creates => "${opentsdb_cluster::hbase_working_dir}/lib/hadoop-core-${opentsdb_cluster::hadoop_version}.jar",
     require => [File["reown_hbase"],File["reown_hadoop"]],
     path    => $::path,
+    user    => $opentsdb_cluster::myuser_name,
   }
-  file{"hadoop-core-1.0.3.jar":
-    path    => "${opentsdb_cluster::hbase_working_dir}/lib/hadoop-core-1.0.3.jar",
+  file{"hadoop-core-1.0.4.jar":
+    path    => "${opentsdb_cluster::hbase_working_dir}/lib/hadoop-core-${opentsdb_cluster::hadoop_version}.jar",
     ensure  => present,
     mode    => 777,
     owner   => $opentsdb_cluster::myuser_name,
@@ -82,7 +84,18 @@ class opentsdb_cluster::hbase::service{
   }
   service{"hbase":
     ensure  => running,
-    require => [File["hbase_service"],Service["hadoop"]],
+    require => [File["hbase_service"],Service["hadoop"], File["/var/log/hbase/startup_log"]],
+  }
+  file{"/var/log/hbase":
+    ensure  => directory,
+    owner   => $opentsdb_cluster::myuser_name,
+    group   => $opentsdb_cluster::mygroup_name,
+  }
+  file{"/var/log/hbase/startup_log":
+    ensure  => file,
+    owner   => $opentsdb_cluster::myuser_name,
+    group   => $opentsdb_cluster::mygroup_name,
+    require => File["/var/log/hbase"],
   }
 }
 

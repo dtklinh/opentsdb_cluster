@@ -132,9 +132,11 @@ class opentsdb_cluster::hadoop::format {
   include opentsdb_cluster::virtual_user::auth_file
 
   exec { "format_hadoop":
-    command => "su - ${opentsdb_cluster::myuser_name} -c 'cd ${opentsdb_cluster::hadoop_working_dir}/bin; hadoop namenode -format'",
+    command => "./hadoop namenode -format",
+    cwd     => "${opentsdb_cluster::hadoop_working_dir}/bin",
     path    => $::path,
     creates => "${opentsdb_cluster::hadoop_working_dir}/format_done",
+    user    => $opentsdb_cluster::myuser_name,
     require => [
       File["reown_hadoop"],
       File["core-site"],

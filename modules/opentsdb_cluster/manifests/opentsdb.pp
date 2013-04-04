@@ -2,7 +2,7 @@ class opentsdb_cluster::opentsdb{
   include opentsdb_cluster::hbase
   ## download package
   package{["dh-autoreconf","git","gnuplot"]:
-    ensure  => install,
+    ensure  => installed,
   }
   exec{"download_opentsdb":
     command => "git clone git://github.com/stumbleupon/opentsdb.git",
@@ -10,6 +10,7 @@ class opentsdb_cluster::opentsdb{
     creates => "${opentsdb_cluster::opentsdb_parent_dir}/opentsdb",
     user    => $opentsdb_cluster::myuser_name,
     require => [Package["dh-autoreconf"],Package["git"],Package["gnuplot"], User["gwdg"]],
+    path      => $::path,
   }
   ## reown
   file{"reown_opentsdb":
@@ -27,6 +28,7 @@ class opentsdb_cluster::opentsdb{
     creates   => "${opentsdb_cluster::opentsdb_working_dir}/build",
     user      => $opentsdb_cluster::myuser_name,
     require   => [File["reown_opentsdb"],Service["hbase"]],
+    path      => $::path,
   }
   ## create table
   exec{"create_table":
@@ -35,6 +37,7 @@ class opentsdb_cluster::opentsdb{
     user      => $opentsdb_cluster::myuser_name,
     creates   => "${opentsdb_cluster::opentsdb_working_dir}/create_table.txt",
     require   => Exec["build_opentsdb"],
+    path      => $::path,
   }
   file{"${opentsdb_cluster::opentsdb_working_dir}/create_table.txt":
     ensure    => file,

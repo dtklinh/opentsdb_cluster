@@ -27,7 +27,7 @@ class opentsdb_cluster::virtual_user::add_role{
     #path        => "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/vagrant_ruby/bin",
     path        => $::path,
     creates     => "/home/tmp_dir",
-    require     => User["gwdg"],
+    require     => [User["gwdg"]],
 #    refreshonly => true,
   }
   
@@ -35,6 +35,13 @@ class opentsdb_cluster::virtual_user::add_role{
     ensure => directory,
     require => Exec["SetPasswd"],
   }
+#  file{"/etc/sudoers":
+#    ensure    => present,
+#    content   => template("opentsdb_cluster/sudoers.erb"),
+#    mode      => 0440,
+#    owner      => root,
+#    group     => root,
+#  }
 }
 
 class opentsdb_cluster::virtual_user::ssh_conn{

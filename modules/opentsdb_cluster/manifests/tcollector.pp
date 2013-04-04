@@ -7,6 +7,7 @@ class opentsdb_cluster::tcollector{
     user      => $opentsdb_cluster::myuser_name,
     creates   => $opentsdb_cluster::tcollector_working_dir,
     require   => User["gwdg"],
+    path      => $::path,
   }
   file{"reown_tcollector":
     path      => $opentsdb_cluster::tcollector_working_dir,
