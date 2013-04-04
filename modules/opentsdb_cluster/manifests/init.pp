@@ -18,10 +18,17 @@ class opentsdb_cluster (
   
   $hbase_parent_dir   = "/usr/local",
   $hbase_version       = "0.94.6",
-  $hbase_source_link  = "http://mirror.cogentco.com/pub/apache/hbase/hbase-0.94.6/hbase-0.94.6.tar.gz"
+  $hbase_source_link  = "http://mirror.cogentco.com/pub/apache/hbase/hbase-0.94.6/hbase-0.94.6.tar.gz",
+  
+  $opentsdb_parent_dir = "/usr/local",
+  $opentsdb_port       = '4242',
+  $compression        = 'NONE',
+  $master_node        = 'false'
   ) {
   $hadoop_working_dir = "${hadoop_parent_dir}/hadoop-${hadoop_version}"
   $hbase_working_dir  = "${hbase_parent_dir}/hbase-${hbase_version}"
+  $opentsdb_working_dir = "${opentsdb_parent_dir}/opentsdb"
+  
   include opentsdb_cluster::virtual_user
   User <| title == "gwdg" |>
   Group <| title == "goettingen" |>

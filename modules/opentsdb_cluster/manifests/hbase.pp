@@ -69,6 +69,7 @@ class opentsdb_cluster::hbase{
 }
 
 class opentsdb_cluster::hbase::service{
+  include opentsdb_cluster::hadoop
   file{"hbase_service":
     path    => "${opentsdb_cluster::service_path}/hbase",
     ensure  => present,
@@ -81,6 +82,7 @@ class opentsdb_cluster::hbase::service{
   }
   service{"hbase":
     ensure  => running,
+    require => [File["hbase_service"],Service["hadoop"]],
   }
 }
 
