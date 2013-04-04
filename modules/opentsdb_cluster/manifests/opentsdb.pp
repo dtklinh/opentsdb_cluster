@@ -8,7 +8,8 @@ class opentsdb_cluster::opentsdb{
     command => "git clone git://github.com/stumbleupon/opentsdb.git",
     cwd     => $opentsdb_cluster::opentsdb_parent_dir,
     creates => "${opentsdb_cluster::opentsdb_parent_dir}/opentsdb",
-    require => [Package["dh-autoreconf"],Package["git"],Package["gnuplot"]],
+    user    => $opentsdb_cluster::myuser_name,
+    require => [Package["dh-autoreconf"],Package["git"],Package["gnuplot"], User["gwdg"]],
   }
   ## reown
   file{"reown_opentsdb":
@@ -48,7 +49,7 @@ class opentsdb_cluster::opentsdb{
   }
   service{"opentsdb":
     ensure  => running,
-    require => File["opentsdb_service"],
+    require => [File["opentsdb_service"], Service["hbase"]],
     subscribe => File["opentsdb_service"],
   }
 }

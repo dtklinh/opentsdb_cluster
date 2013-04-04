@@ -23,11 +23,15 @@ class opentsdb_cluster (
   $opentsdb_parent_dir = "/usr/local",
   $opentsdb_port       = '4242',
   $compression        = 'NONE',
-  $master_node        = 'false'
+  $master_node        = 'false',
+  
+  $tcollector_parent_dir = "/usr/local",
+  
   ) {
   $hadoop_working_dir = "${hadoop_parent_dir}/hadoop-${hadoop_version}"
   $hbase_working_dir  = "${hbase_parent_dir}/hbase-${hbase_version}"
   $opentsdb_working_dir = "${opentsdb_parent_dir}/opentsdb"
+  $tcollector_working_dir = "${tcollector_parent_dir}/tcollector"
   
   include opentsdb_cluster::virtual_user
   User <| title == "gwdg" |>
