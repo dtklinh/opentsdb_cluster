@@ -51,7 +51,7 @@ class opentsdb_cluster::hadoop {
   $var = template("opentsdb_cluster/hadoop_env_var.erb")
 
   exec { "add_env_var":
-    command => "echo ${var} >> /home/${opentsdb_cluster::myuser_name}/.bashrc",
+    command => "echo '${var}' >> /home/${opentsdb_cluster::myuser_name}/.bashrc",
     path    => $::path,
     unless  => "grep -q 'HADOOP' /home/${opentsdb_cluster::myuser_name}/.bashrc",
     require => File["reown_hadoop"],
@@ -132,9 +132,9 @@ class opentsdb_cluster::hadoop::format {
   include opentsdb_cluster::virtual_user::auth_file
 
   exec { "format_hadoop":
-    command => "./hadoop namenode -format",
+    command => "hadoop namenode -format",
     cwd     => "${opentsdb_cluster::hadoop_working_dir}/bin",
-    path    => $::path,
+    path    => "${path}:${opentsdb_cluster::hadoop_working_dir}/bin",
     creates => "${opentsdb_cluster::hadoop_working_dir}/format_done",
     user    => $opentsdb_cluster::myuser_name,
     require => [
@@ -174,7 +174,7 @@ class opentsdb_cluster::hadoop::service {
 
   service { "hadoop":
     ensure  => running,
-    require => [File["hadoop_service"], File["id_rsa"], File["id_rsa.pub"], File["authorized_keys"]],
+    require => [Exec["format_hadoop"], File["hadoop_service"], File["id_rsa"], File["id_rsa.pub"], File["authorized_keys"]],
   }
 }
 

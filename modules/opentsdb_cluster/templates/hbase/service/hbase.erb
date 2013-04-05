@@ -11,6 +11,7 @@
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 HBASE_BIN=<%= scope.lookupvar('::opentsdb_cluster::hbase_working_dir') %>/bin
+JAVA_HOME=<%= scope.lookupvar('::opentsdb_cluster::java_home') %>
 NAME=hbase
 DESC=hbase
 USER=<%= scope.lookupvar('::opentsdb_cluster::myuser_name') %>

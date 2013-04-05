@@ -4,6 +4,7 @@ node "master" {
     install_hbase      => true,
     install_opentsdb   => true,
     install_tcollector => true,
+    setup_user         => true, 
   }
   /*
    * include opentsdb_cluster
@@ -26,12 +27,15 @@ node "master" {
    *    path              => $::path,
    *  }
    */
+   
+   
 }
 
 node "slave" {
   class{'opentsdb_cluster':
     install_hadoop    => true,
     install_hbase     => true,
+    setup_user        => true,
   }
   /*
    * include opentsdb_cluster
