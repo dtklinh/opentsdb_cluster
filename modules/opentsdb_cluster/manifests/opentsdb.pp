@@ -23,12 +23,12 @@ class opentsdb_cluster::opentsdb{
   }
   ## build opentsdb
   exec{"build_opentsdb":
-    command   => "./build.sh",
+    command   => "build.sh",
     cwd       => "${opentsdb_cluster::opentsdb_working_dir}",
     creates   => "${opentsdb_cluster::opentsdb_working_dir}/build",
     user      => $opentsdb_cluster::myuser_name,
     require   => [File["reown_opentsdb"],Service["hbase"]],
-    path      => $::path,
+    path      => "${path}:${opentsdb_cluster::opentsdb_working_dir}",
   }
   ## create table
   exec{"create_table":
@@ -50,11 +50,12 @@ class opentsdb_cluster::opentsdb{
     ensure  => present,
     require => File["reown_opentsdb"],
   }
-  service{"opentsdb":
-    ensure  => running,
-    require => [File["opentsdb_service"], Service["hbase"]],
-    subscribe => File["opentsdb_service"],
-  }
+  
+#  service{"opentsdb":
+#    ensure  => running,
+#    require => [File["opentsdb_service"], Service["hbase"]],
+#    subscribe => File["opentsdb_service"],
+#  }
 }
 
 

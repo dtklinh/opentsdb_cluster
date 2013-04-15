@@ -2,9 +2,10 @@ node "master" {
   class { 'opentsdb_cluster':
     install_hadoop     => true,
     install_hbase      => true,
-    install_opentsdb   => true,
-    install_tcollector => true,
+#    install_opentsdb   => true,
+#    install_tcollector => true,
     setup_user         => true, 
+    compression        => 'LZO',
   }
   /*
    * include opentsdb_cluster
@@ -36,6 +37,7 @@ node "slave" {
     install_hadoop    => true,
     install_hbase     => true,
     setup_user        => true,
+    compression       => 'LZO',
   }
   /*
    * include opentsdb_cluster

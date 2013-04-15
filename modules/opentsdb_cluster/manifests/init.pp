@@ -14,11 +14,12 @@ class opentsdb_cluster (
   $java_home             = "/usr/lib/jvm/java-1.6.0-openjdk-amd64",
   $service_path          = "/etc/init.d",
   $hbase_parent_dir      = "/usr/local",
-  $hbase_version         = "0.94.6",
-  $hbase_source_link     = "http://mirror.cogentco.com/pub/apache/hbase/hbase-0.94.6/hbase-0.94.6.tar.gz",
+  $hbase_version         = "0.94.6.1",
+  $hbase_source_link     = "http://mirror.cogentco.com/pub/apache/hbase/hbase-0.94.6.1/hbase-0.94.6.1.tar.gz",
   $opentsdb_parent_dir   = "/usr/local",
   $opentsdb_port         = '4242',
   $compression           = 'NONE',
+  $os_structure          = 'Linux-amd64-64', 
   $master_node           = false,
   $tcollector_parent_dir = "/usr/local",
   $install_hadoop        = false,
@@ -72,6 +73,11 @@ class opentsdb_cluster (
   }
 
   #######################################################################
+  ###########################--- Install LZO ---##########################
+  if $compression == 'LZO'{
+    include opentsdb_cluster::lzo
+  }
+  ########################################################################
 
   # ########################---Install Opentsdb---########################
   if $install_opentsdb == true {
