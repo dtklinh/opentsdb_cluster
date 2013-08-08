@@ -1,7 +1,7 @@
 class opentsdb_cluster (
-  $puppet_hostname       = "master",
-  $slave_hostname        = "slave",
-  $slave_ip              = "192.168.33.21",
+  $puppet_hostname       = "mastertsdb",
+  $slave_hostname        = "slavetsdb",
+  $slave_ip              = "192.168.33.75",
   $myuser_name           = "gwdg",
   $myuser_id             = "1010",
   $myuser_passwd         = '\$6\$aqzOtgCM\$OxgoMP4JoqMJ1U1F3MZPo2iBefDRnRCXSfgIM36E5cfMNcE7GcNtH1P/tTC2QY3sX3BxxJ7r/9ciScIVTa55l0',
@@ -34,6 +34,9 @@ class opentsdb_cluster (
   $opentsdb_working_dir = "${opentsdb_parent_dir}/opentsdb"
   $tcollector_working_dir = "${tcollector_parent_dir}/tcollector"
   $lzo_working_dir      = "${lzo_parent_dir}/lzo"
+  ############################## init ###################################
+  include opentsdb_cluster::puppet_database
+#  Host <<| tag == "hostname" |>>
 
   # #######################---Prepare Machines---########################
   if $setup_user == true {

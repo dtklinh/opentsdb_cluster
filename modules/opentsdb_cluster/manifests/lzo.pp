@@ -2,7 +2,7 @@ class opentsdb_cluster::lzo {
   include opentsdb_cluster::hadoop
   include opentsdb_cluster::hbase
 
-  package { ["liblzo2-dev", "ant"]: ensure => installed, }
+  package { ["liblzo2-dev", "ant", "git"]: ensure => installed, }
 
   # #download
   exec { "download_lzo":
@@ -10,7 +10,7 @@ class opentsdb_cluster::lzo {
     cwd     => $opentsdb_cluster::lzo_parent_dir,
     creates => $opentsdb_cluster::lzo_working_dir,
     path    => $::path,
-    require => User["gwdg"],
+    require => [User["gwdg"], Package["git"]],
   }
 
   file { "reown_lzo":
